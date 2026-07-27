@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Torre dos Desafios</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --card-border: #334155;
+    --primary: #38bdf8;
+    --primary-soft: rgba(56, 189, 248, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% 15%, rgba(56, 189, 248, 0.08), transparent 40%),
+      radial-gradient(circle at 80% 85%, rgba(56, 189, 248, 0.06), transparent 45%);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  .palco {
+    display: flex;
+    flex-wrap: wrap;
+    gap: clamp(20px, 4vw, 48px);
+    justify-content: center;
+    align-items: center;
+    padding: 40px 24px;
+    max-width: 1200px;
+  }
+
+  /* Cada opção é um botão real (acessível via teclado/leitor de tela) */
+  .opcao {
+    all: unset;
+    cursor: pointer;
+    position: relative;
+    width: min(30vw, 300px);
+    aspect-ratio: 3 / 4;
+    min-width: 190px;
+    border-radius: 28px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.45);
+    overflow: hidden;
+    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
+  }
+
+  .opcao::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    box-shadow: 0 0 0 0 var(--primary-soft);
+    transition: box-shadow 0.35s ease;
+    pointer-events: none;
+  }
+
+  .opcao:hover,
+  .opcao:focus-visible {
+    transform: translateY(-6px) scale(1.02);
+    border-color: var(--primary);
+  }
+
+  .opcao:hover::after,
+  .opcao:focus-visible::after {
+    box-shadow: 0 0 45px 6px var(--primary-soft);
+  }
+
+  .opcao:focus-visible {
+    outline: none;
+  }
+
+  /* Área preta que enquadra o vídeo, igual ao padrão da torre física */
+  .video-area {
+    position: absolute;
+    inset: 0;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .video-area video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    background: #000;
+  }
+
+  .midia {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: opacity 0.2s ease;
+  }
+
+  .midia.oculta {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* Pulso sutil convidando o usuário a passar o mouse, some ao interagir */
+  .aviso-pulso {
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    border: 2px solid var(--primary-soft);
+    animation: pulsar 2.4s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .opcao:hover .aviso-pulso,
+  .opcao:focus-visible .aviso-pulso,
+  .opcao.tocado .aviso-pulso {
+    animation: none;
+    opacity: 0;
+  }
+
+  @keyframes pulsar {
+    0%   { box-shadow: 0 0 0 0 var(--primary-soft); opacity: 1; }
+    70%  { box-shadow: 0 0 0 14px rgba(56, 189, 248, 0); opacity: 0.4; }
+    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); opacity: 1; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .aviso-pulso { animation: none; }
+    .opcao, .opcao::after { transition: none; }
+  }
+
+  @media (max-width: 640px) {
+    .palco { flex-direction: column; }
+    .opcao { width: min(70vw, 320px); }
+  }
+</style>
+</head>
+<body>
+
+  <div class="palco">
+
+    <!-- Troque "SEU_ARQUIVO.gif" pelo nome exato do seu gif (ex: iniciar.gif) -->
+    <button class="opcao" id="opcao-iniciar" data-destino="iniciar.html"
+             data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/iniciar/600/800"
+             aria-label="Iniciar">
+      <div class="video-area">
+        <img class="midia" src="https://picsum.photos/seed/iniciar/600/800" alt="">
+      </div>
+      <span class="aviso-pulso"></span>
+    </button>
+
+    <button class="opcao" id="opcao-descricao" data-destino="descricao.html"
+             data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/descricao/600/800"
+             aria-label="Descrição">
+      <div class="video-area">
+        <img class="midia" src="https://picsum.photos/seed/descricao/600/800" alt="">
+      </div>
+      <span class="aviso-pulso"></span>
+    </button>
+    
+    <button class="opcao" id="opcao-creditos" data-destino="creditos.html" aria-label="Créditos">
+      <div class="video-area">
+        <img class="midia capa-creditos" src="Untitled.png" alt="">
+        <video class="midia video-creditos oculta" muted playsinline preload="auto"
+               src="videos_sinais.mp4">
+        </video>
+      </div>
+      <span class="aviso-pulso"></span>
+    </button>
+
+  </div>
+
+<script>
+  // Dispara GIFs/vídeos apenas enquanto o mouse estiver sobre o card.
+  const opcoes = document.querySelectorAll(".opcao");
+
+  opcoes.forEach((opcao) => {
+    const video = opcao.querySelector("video");
+    const imagem = opcao.querySelector("img.midia");
+    const gif = opcao.dataset.gif;
+    const poster = opcao.dataset.poster;
+
+    function tocar() {
+      opcao.classList.add("tocado");
+      if (video) {
+        video.classList.remove("oculta");
+        if (imagem) imagem.classList.add("oculta");
+        video.currentTime = 0;
+        const promessa = video.play();
+        if (promessa !== undefined) {
+          promessa.catch(() => {
+            // Se o navegador recusar o autoplay, tenta de novo assim que o vídeo
+            // tiver dados suficientes carregados.
+            video.addEventListener("canplay", () => video.play().catch(() => {}), { once: true });
+          });
+        }
+      }
+
+      if (imagem && gif) {
+        imagem.src = gif;
+      }
+    }
+
+    function pausar() {
+      if (video) {
+        video.pause();
+        try { video.currentTime = 0; } catch (e) {}
+        video.classList.add("oculta");
+      }
+
+      if (imagem && poster) {
+        imagem.classList.remove("oculta");
+        imagem.src = poster;
+      }
+    }
+
+    opcao.addEventListener("mouseenter", tocar);
+    opcao.addEventListener("mouseleave", pausar);
+    // Ao clicar (ou apertar Enter/Espaço com o botão focado), navega pra página da opção
+    opcao.addEventListener("click", () => {
+      const destino = opcao.dataset.destino;
+      if (destino) window.location.href = destino;
+    });
+  });
+</script>
+
+</body>
+</html>
