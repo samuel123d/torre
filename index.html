@@ -1,243 +1,135 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Torre dos Desafios</title>
-<style>
-  :root {
-    --bg: #0f172a;
-    --card: #1e293b;
-    --card-border: #334155;
-    --primary: #38bdf8;
-    --primary-soft: rgba(56, 189, 248, 0.35);
-  }
-
-  * { box-sizing: border-box; }
-
-  html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    background: var(--bg);
-    background-image:
-      radial-gradient(circle at 20% 15%, rgba(56, 189, 248, 0.08), transparent 40%),
-      radial-gradient(circle at 80% 85%, rgba(56, 189, 248, 0.06), transparent 45%);
-    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
-  }
-
-  body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  .palco {
-    display: flex;
-    flex-wrap: wrap;
-    gap: clamp(20px, 4vw, 48px);
-    justify-content: center;
-    align-items: center;
-    padding: 40px 24px;
-    max-width: 1200px;
-  }
-
-  /* Cada opção é um botão real (acessível via teclado/leitor de tela) */
-  .opcao {
-    all: unset;
-    cursor: pointer;
-    position: relative;
-    width: min(30vw, 300px);
-    aspect-ratio: 3 / 4;
-    min-width: 190px;
-    border-radius: 28px;
-    background: var(--card);
-    border: 1px solid var(--card-border);
-    box-shadow: 0 15px 35px rgba(0,0,0,0.45);
-    overflow: hidden;
-    transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
-  }
-
-  .opcao::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: 28px;
-    box-shadow: 0 0 0 0 var(--primary-soft);
-    transition: box-shadow 0.35s ease;
-    pointer-events: none;
-  }
-
-  .opcao:hover,
-  .opcao:focus-visible {
-    transform: translateY(-6px) scale(1.02);
-    border-color: var(--primary);
-  }
-
-  .opcao:hover::after,
-  .opcao:focus-visible::after {
-    box-shadow: 0 0 45px 6px var(--primary-soft);
-  }
-
-  .opcao:focus-visible {
-    outline: none;
-  }
-
-  /* Área preta que enquadra o vídeo, igual ao padrão da torre física */
-  .video-area {
-    position: absolute;
-    inset: 0;
-    background: #000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .video-area video {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: #000;
-  }
-
-  .midia {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: opacity 0.2s ease;
-  }
-
-  .midia.oculta {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  /* Pulso sutil convidando o usuário a passar o mouse, some ao interagir */
-  .aviso-pulso {
-    position: absolute;
-    inset: 0;
-    border-radius: 28px;
-    border: 2px solid var(--primary-soft);
-    animation: pulsar 2.4s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  .opcao:hover .aviso-pulso,
-  .opcao:focus-visible .aviso-pulso,
-  .opcao.tocado .aviso-pulso {
-    animation: none;
-    opacity: 0;
-  }
-
-  @keyframes pulsar {
-    0%   { box-shadow: 0 0 0 0 var(--primary-soft); opacity: 1; }
-    70%  { box-shadow: 0 0 0 14px rgba(56, 189, 248, 0); opacity: 0.4; }
-    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); opacity: 1; }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .aviso-pulso { animation: none; }
-    .opcao, .opcao::after { transition: none; }
-  }
-
-  @media (max-width: 640px) {
-    .palco { flex-direction: column; }
-    .opcao { width: min(70vw, 320px); }
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Torre dos Desafios</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%9F%3C/text%3E%3C/svg%3E">
+  <style>
+    :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --primary:#38bdf8; --soft:rgba(56,189,248,.35); }
+    * { box-sizing:border-box; }
+    html, body { height:100%; margin:0; overflow:hidden; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; color:#e2e8f0; background:var(--bg); background-image:radial-gradient(circle at 20% 15%,rgba(56,189,248,.08),transparent 40%),radial-gradient(circle at 80% 85%,rgba(56,189,248,.06),transparent 45%); }
+    button { font:inherit; }
+    .tela { display:none; height:100vh; min-height:0; padding:clamp(18px,4vw,40px); overflow:hidden; }
+    .tela::-webkit-scrollbar { display:none; }
+    .tela.ativa { display:flex; }
+    #menu { align-items:center; justify-content:center; }
+    .palco { display:flex; flex-wrap:wrap; gap:clamp(20px,4vw,48px); justify-content:center; align-items:center; max-width:1200px; }
+    .opcao, .voltar { position:relative; overflow:hidden; border:1px solid var(--border); border-radius:28px; color:var(--primary); background:var(--card); box-shadow:0 15px 35px rgba(0,0,0,.45); cursor:pointer; transition:transform .35s ease,border-color .35s ease,box-shadow .35s ease; }
+    .opcao { width:min(30vw,300px,calc((100vh - 220px) * .75)); min-width:0; aspect-ratio:3/4; padding:0; }
+    .voltar { width:92px; aspect-ratio:3/4; padding:0; flex:none; }
+    .opcao::after, .voltar::after { content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none; transition:box-shadow .35s ease; }
+    .opcao:hover, .opcao:focus-visible, .voltar:hover, .voltar:focus-visible { outline:none; transform:translateY(-6px) scale(1.02); border-color:var(--primary); }
+    .opcao:hover::after, .opcao:focus-visible::after, .voltar:hover::after, .voltar:focus-visible::after { box-shadow:0 0 45px 6px var(--soft); }
+    .video-area { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:#000; }
+    .midia { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; transition:opacity .2s ease; }
+    .oculta { opacity:0; pointer-events:none; }
+    .aviso-pulso { position:absolute; inset:0; border:2px solid var(--soft); border-radius:inherit; animation:pulsar 2.4s ease-in-out infinite; pointer-events:none; }
+    .opcao:hover .aviso-pulso, .opcao:focus-visible .aviso-pulso, .opcao.tocado .aviso-pulso, .voltar:hover .aviso-pulso, .voltar:focus-visible .aviso-pulso { animation:none; opacity:0; }
+    @keyframes pulsar { 0%,100% { box-shadow:0 0 0 0 var(--soft); opacity:1; } 70% { box-shadow:0 0 0 14px rgba(56,189,248,0); opacity:.4; } }
+    .pagina { width:min(100%,1200px); height:100%; margin:0 auto; }
+    .cabecalho { display:flex; align-items:center; gap:24px; margin-bottom:clamp(16px,4vh,42px); }
+    .cabecalho h1 { margin:0; font-size:clamp(1.5rem,4vw,2.5rem); }
+    .card { width:min(100%,500px); margin:auto; padding:20px; border:1px solid var(--border); border-radius:30px; background:var(--card); box-shadow:0 15px 35px rgba(0,0,0,.5); }
+    #imagemArea { position:relative; display:flex; height:min(450px,calc(100vh - 220px)); align-items:center; justify-content:center; overflow:hidden; border-radius:20px; background:#000; }
+    #imagemPrincipal { width:100%; height:100%; object-fit:contain; }
+    .progress-container { position:absolute; bottom:0; left:0; display:none; width:100%; height:12px; background:rgba(0,0,0,.5); }
+    .progress-bar { width:0; height:100%; background:var(--primary); transition:width 7s linear; }
+    #boasVindas { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:var(--bg); transition:opacity 1.2s ease-in-out; }
+    #boasVindas img { width:500px; max-width:90%; border-radius:30px; box-shadow:0 0 50px rgba(56,189,248,.3); }
+    .texto { max-width:700px; margin:auto; padding:32px; border:1px solid var(--border); border-radius:24px; background:var(--card); line-height:1.6; }
+    .texto p { margin:0; color:#cbd5e1; }
+    .conteudo-central { display:flex; height:calc(100% - 140px); min-height:0; align-items:center; justify-content:center; }
+    #creditos .pagina { display:flex; flex-direction:column; }
+    #creditos .palco { flex:1; min-height:0; }
+    @media (max-width:640px) { .palco { gap:8px; } .opcao { width:min(28vw,220px,calc((100vh - 180px) * .75)); } .voltar { width:76px; } #imagemArea { height:min(60vh,calc(100vh - 180px)); } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { transition:none!important; animation:none!important; } }
+  </style>
 </head>
 <body>
+  <main id="menu" class="tela ativa" aria-label="Menu principal">
+    <div class="palco">
+      <button class="opcao" data-tela="iniciar" data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/iniciar/600/800" aria-label="Iniciar">
+        <span class="video-area"><img class="midia" src="https://picsum.photos/seed/iniciar/600/800" alt=""></span><span class="aviso-pulso"></span>
+      </button>
+      <button class="opcao" data-tela="creditos" data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/descricao/600/800" aria-label="Créditos">
+        <span class="video-area"><img class="midia" src="https://picsum.photos/seed/descricao/600/800" alt=""></span><span class="aviso-pulso"></span>
+      </button>
+      <button class="opcao" data-tela="descricao" data-poster="https://picsum.photos/seed/creditos/600/800" aria-label="Descrição">
+        <span class="video-area"><img class="midia capa-creditos" src="https://picsum.photos/seed/creditos/600/800" alt=""><video class="midia video-creditos oculta" muted playsinline preload="auto" src="videos_sinais.mp4"></video></span><span class="aviso-pulso"></span>
+      </button>
+    </div>
+  </main>
 
-  <div class="palco">
+  <section id="iniciar" class="tela" aria-label="Iniciar">
+    <div id="boasVindas"><img src="https://www.image2url.com/r2/default/gifs/1778612673738-ff2c57ba-1fc0-48f6-a85a-27608604c61d.gif" alt="Boas-vindas"></div>
+    <div class="pagina">
+      <header class="cabecalho">
+        <button class="voltar" data-voltar data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/voltar/600/800" aria-label="Voltar ao menu">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/voltar/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
+      </header>
+      <div class="conteudo-central"><div class="card"><div id="imagemArea"><img id="imagemPrincipal" src="zero.png" alt="Torre de blocos"><div class="progress-container" id="pCont"><div class="progress-bar" id="pBar"></div></div></div></div></div>
+    </div>
+  </section>
 
-    <!-- Troque "SEU_ARQUIVO.gif" pelo nome exato do seu gif (ex: iniciar.gif) -->
-    <button class="opcao" id="opcao-iniciar" data-destino="iniciar.html"
-             data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/iniciar/600/800"
-             aria-label="Iniciar">
-      <div class="video-area">
-        <img class="midia" src="https://picsum.photos/seed/iniciar/600/800" alt="">
+  <section id="creditos" class="tela" aria-label="Créditos">
+    <div class="pagina">
+      <header class="cabecalho">
+        <button class="voltar" data-voltar data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/voltar/600/800" aria-label="Home">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/voltar/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
+      </header>
+      <div class="palco">
+        <button class="opcao" data-tela="iniciar" data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/iniciar/600/800" aria-label="Iniciar">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/iniciar/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
+        <button class="opcao" data-tela="creditos" data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/descricao/600/800" aria-label="Créditos">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/descricao/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
+        <button class="opcao" data-tela="descricao" data-poster="https://picsum.photos/seed/creditos/600/800" aria-label="Descrição">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/creditos/600/800" alt=""><video class="midia oculta" muted playsinline preload="auto" src="videos_sinais.mp4"></video></span><span class="aviso-pulso"></span>
+        </button>
       </div>
-      <span class="aviso-pulso"></span>
-    </button>
-
-    <button class="opcao" id="opcao-descricao" data-destino="descricao.html"
-             data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/descricao/600/800"
-             aria-label="Descrição">
-      <div class="video-area">
-        <img class="midia" src="https://picsum.photos/seed/descricao/600/800" alt="">
+    </div>
+  </section>
+  <section id="descricao" class="tela" aria-label="Descrição">
+    <div class="pagina">
+      <header class="cabecalho">
+        <button class="voltar" data-voltar data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/voltar/600/800" aria-label="Voltar ao menu">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/voltar/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
+      </header>
+      <div class="conteudo-central">
+        <button class="opcao" type="button" data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/descricao/600/800" aria-label="Descrição em Libras">
+          <span class="video-area"><img class="midia" src="https://picsum.photos/seed/descricao/600/800" alt=""></span><span class="aviso-pulso"></span>
+        </button>
       </div>
-      <span class="aviso-pulso"></span>
-    </button>
-    
-    <button class="opcao" id="opcao-creditos" data-destino="creditos.html" aria-label="Créditos">
-      <div class="video-area">
-        <img class="midia capa-creditos" src="Untitled.png" alt="">
-        <video class="midia video-creditos oculta" muted playsinline preload="auto"
-               src="videos_sinais.mp4">
-        </video>
-      </div>
-      <span class="aviso-pulso"></span>
-    </button>
+    </div>
+  </section>
 
-  </div>
-
-<script>
-  // Dispara GIFs/vídeos apenas enquanto o mouse estiver sobre o card.
-  const opcoes = document.querySelectorAll(".opcao");
-
-  opcoes.forEach((opcao) => {
-    const video = opcao.querySelector("video");
-    const imagem = opcao.querySelector("img.midia");
-    const gif = opcao.dataset.gif;
-    const poster = opcao.dataset.poster;
-
-    function tocar() {
-      opcao.classList.add("tocado");
-      if (video) {
-        video.classList.remove("oculta");
-        if (imagem) imagem.classList.add("oculta");
-        video.currentTime = 0;
-        const promessa = video.play();
-        if (promessa !== undefined) {
-          promessa.catch(() => {
-            // Se o navegador recusar o autoplay, tenta de novo assim que o vídeo
-            // tiver dados suficientes carregados.
-            video.addEventListener("canplay", () => video.play().catch(() => {}), { once: true });
-          });
-        }
-      }
-
-      if (imagem && gif) {
-        imagem.src = gif;
-      }
-    }
-
-    function pausar() {
-      if (video) {
-        video.pause();
-        try { video.currentTime = 0; } catch (e) {}
-        video.classList.add("oculta");
-      }
-
-      if (imagem && poster) {
-        imagem.classList.remove("oculta");
-        imagem.src = poster;
-      }
-    }
-
-    opcao.addEventListener("mouseenter", tocar);
-    opcao.addEventListener("mouseleave", pausar);
-    // Ao clicar (ou apertar Enter/Espaço com o botão focado), navega pra página da opção
-    opcao.addEventListener("click", () => {
-      const destino = opcao.dataset.destino;
-      if (destino) window.location.href = destino;
+  <script>
+    const telas = document.querySelectorAll('.tela');
+    function mostrarTela(id) { telas.forEach(tela => tela.classList.toggle('ativa', tela.id === id)); window.scrollTo(0, 0); }
+    document.querySelectorAll('[data-voltar]').forEach(botao => {
+      const imagem = botao.querySelector('img.midia');
+      botao.addEventListener('mouseenter', () => { if (imagem && botao.dataset.gif) imagem.src = botao.dataset.gif; });
+      botao.addEventListener('mouseleave', () => { if (imagem && botao.dataset.poster) imagem.src = botao.dataset.poster; });
+      botao.addEventListener('click', () => mostrarTela('menu'));
     });
-  });
-</script>
-
+    document.querySelectorAll('.opcao').forEach(opcao => {
+      const video = opcao.querySelector('video'), imagem = opcao.querySelector('img.midia');
+      function tocar() { opcao.classList.add('tocado'); if (video) { video.classList.remove('oculta'); imagem?.classList.add('oculta'); video.currentTime = 0; video.play().catch(() => {}); } else if (imagem && opcao.dataset.gif) imagem.src = opcao.dataset.gif; }
+      function pausar() { if (video) { video.pause(); video.currentTime = 0; video.classList.add('oculta'); } if (imagem) { imagem.classList.remove('oculta'); if (opcao.dataset.poster) imagem.src = opcao.dataset.poster; } }
+      opcao.addEventListener('mouseenter', tocar); opcao.addEventListener('mouseleave', pausar);
+      if (opcao.dataset.tela) opcao.addEventListener('click', () => mostrarTela(opcao.dataset.tela));
+    });
+    const ipPC = 'IP_DO_PC_REPLACER', imagensNumeros = {0:'zero.png',1:'um.png',2:'dois.png',3:'tres.png',4:'quatro.png',5:'cinco.png',6:'seis.png',7:'sete.png',8:'oito.png',9:'nove.png',10:'dez.png'}, gifTijolo = 'https://www.image2url.com/r2/default/gifs/1778607738665-bd4bfd3d-6a83-4b1f-8745-e2872d60a9af.gif';
+    let lastBlocos = -1, animando = false;
+    setTimeout(() => { const boasVindas = document.getElementById('boasVindas'); boasVindas.style.opacity = '0'; setTimeout(() => boasVindas.style.display = 'none', 1200); }, 4000);
+    function atualizarTorre(n) { animando = true; const img = document.getElementById('imagemPrincipal'), pBar = document.getElementById('pBar'), pCont = document.getElementById('pCont'); pCont.style.display = 'block'; pBar.style.transition = 'none'; pBar.style.width = '0%'; setTimeout(() => { pBar.style.transition = 'width 7s linear'; pBar.style.width = '100%'; img.src = gifTijolo + '?t=' + Date.now(); }, 100); setTimeout(() => { img.src = 'http://' + ipPC + '/' + (imagensNumeros[n] || 'zero.png'); pCont.style.display = 'none'; animando = false; }, 7000); }
+    function verificar() { if (animando) return; fetch('/dados').then(r => r.text()).then(v => { const n = parseInt(v); if (!isNaN(n) && n !== lastBlocos) { if (lastBlocos === -1) { lastBlocos = n; return; } lastBlocos = n; atualizarTorre(n); } }).catch(() => {}); }
+    setInterval(verificar, 1000);
+  </script>
 </body>
 </html>
