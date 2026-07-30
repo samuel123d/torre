@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Torre dos Desafios</title>
+  <link rel="preload" as="image" href="https://www.image2url.com/r2/default/gifs/1778612673738-ff2c57ba-1fc0-48f6-a85a-27608604c61d.gif">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A4%9F%3C/text%3E%3C/svg%3E">
   <style>
     :root { --bg:#0f172a; --card:#1e293b; --border:#334155; --primary:#38bdf8; --soft:rgba(56,189,248,.35); }
@@ -35,7 +36,7 @@
     #imagemPrincipal { width:100%; height:100%; object-fit:contain; }
     .progress-container { position:absolute; bottom:0; left:0; display:none; width:100%; height:12px; background:rgba(0,0,0,.5); }
     .progress-bar { width:0; height:100%; background:var(--primary); transition:width 7s linear; }
-    #boasVindas { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:var(--bg); transition:opacity 1.2s ease-in-out; }
+    #boasVindas { position:fixed; inset:0; z-index:10; display:flex; align-items:center; justify-content:center; background:var(--bg); pointer-events:none; transition:opacity 1.2s ease-in-out; }
     #boasVindas img { width:500px; max-width:90%; border-radius:30px; box-shadow:0 0 50px rgba(56,189,248,.3); }
     .texto { max-width:700px; margin:auto; padding:32px; border:1px solid var(--border); border-radius:24px; background:var(--card); line-height:1.6; }
     .texto p { margin:0; color:#cbd5e1; }
@@ -62,7 +63,7 @@
   </main>
 
   <section id="iniciar" class="tela" aria-label="Iniciar">
-    <div id="boasVindas"><img src="video_libras.gif" alt="Boas-vindas em Libras"></div>
+    <div id="boasVindas" hidden><img alt="Boas-vindas em Libras"></div>
     <div class="pagina">
       <header class="cabecalho">
         <button class="voltar" data-voltar data-gif="libras-sinais.gif" data-poster="https://picsum.photos/seed/voltar/600/800" aria-label="Voltar ao menu">
@@ -110,6 +111,21 @@
 
   <script>
     const telas = document.querySelectorAll('.tela');
+    const gifBoasVindas = 'https://www.image2url.com/r2/default/gifs/1778612673738-ff2c57ba-1fc0-48f6-a85a-27608604c61d.gif';
+    let temporizadorBoasVindas, boasVindasExibidas = false;
+    function exibirBoasVindas() {
+      const boasVindas = document.getElementById('boasVindas');
+      const imagem = boasVindas.querySelector('img');
+      clearTimeout(temporizadorBoasVindas);
+      imagem.src = gifBoasVindas;
+      boasVindas.hidden = false;
+      boasVindas.style.display = 'flex';
+      boasVindas.style.opacity = '1';
+      temporizadorBoasVindas = setTimeout(() => {
+        boasVindas.style.opacity = '0';
+        setTimeout(() => { boasVindas.hidden = true; imagem.removeAttribute('src'); }, 1200);
+      }, 4000);
+    }
     function mostrarTela(id) { telas.forEach(tela => tela.classList.toggle('ativa', tela.id === id)); window.scrollTo(0, 0); }
     document.querySelectorAll('[data-voltar]').forEach(botao => {
       const imagem = botao.querySelector('img.midia');
@@ -122,11 +138,16 @@
       function tocar() { opcao.classList.add('tocado'); if (video) { video.classList.remove('oculta'); imagem?.classList.add('oculta'); video.currentTime = 0; video.play().catch(() => {}); } else if (imagem && opcao.dataset.gif) imagem.src = opcao.dataset.gif; }
       function pausar() { if (video) { video.pause(); video.currentTime = 0; video.classList.add('oculta'); } if (imagem) { imagem.classList.remove('oculta'); if (opcao.dataset.poster) imagem.src = opcao.dataset.poster; } }
       opcao.addEventListener('mouseenter', tocar); opcao.addEventListener('mouseleave', pausar);
-      if (opcao.dataset.tela) opcao.addEventListener('click', () => mostrarTela(opcao.dataset.tela));
+      if (opcao.dataset.tela) opcao.addEventListener('click', () => {
+        mostrarTela(opcao.dataset.tela);
+        if (opcao.dataset.tela === 'iniciar' && !boasVindasExibidas) {
+          boasVindasExibidas = true;
+          exibirBoasVindas();
+        }
+      });
     });
     const ipPC = 'IP_DO_PC_REPLACER', imagensNumeros = {0:'zero.png',1:'um.png',2:'dois.png',3:'tres.png',4:'quatro.png',5:'cinco.png',6:'seis.png',7:'sete.png',8:'oito.png',9:'nove.png',10:'dez.png'}, gifTijolo = 'https://www.image2url.com/r2/default/gifs/1778607738665-bd4bfd3d-6a83-4b1f-8745-e2872d60a9af.gif';
     let lastBlocos = -1, animando = false;
-    setTimeout(() => { const boasVindas = document.getElementById('boasVindas'); boasVindas.style.opacity = '0'; setTimeout(() => boasVindas.style.display = 'none', 1200); }, 4000);
     function atualizarTorre(n) { animando = true; const img = document.getElementById('imagemPrincipal'), pBar = document.getElementById('pBar'), pCont = document.getElementById('pCont'); pCont.style.display = 'block'; pBar.style.transition = 'none'; pBar.style.width = '0%'; setTimeout(() => { pBar.style.transition = 'width 7s linear'; pBar.style.width = '100%'; img.src = gifTijolo + '?t=' + Date.now(); }, 100); setTimeout(() => { img.src = 'http://' + ipPC + '/' + (imagensNumeros[n] || 'zero.png'); pCont.style.display = 'none'; animando = false; }, 7000); }
     function verificar() { if (animando) return; fetch('/dados').then(r => r.text()).then(v => { const n = parseInt(v); if (!isNaN(n) && n !== lastBlocos) { if (lastBlocos === -1) { lastBlocos = n; return; } lastBlocos = n; atualizarTorre(n); } }).catch(() => {}); }
     setInterval(verificar, 1000);
